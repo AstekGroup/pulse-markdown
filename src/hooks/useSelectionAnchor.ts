@@ -58,6 +58,30 @@ export function enclosingRootBlock(container: HTMLElement, node: Node): HTMLElem
   return null;
 }
 
+/**
+ * Bloc racine visé par une sélection de texte — variante de
+ * `enclosingRootBlock` tolérante aux sélections dont `commonAncestorContainer`
+ * ne descend pas jusqu'au bloc réellement sélectionné.
+ *
+ * Un triple-clic (« sélectionner le paragraphe ») ne produit pas toujours un
+ * `Range` dont les bornes pointent dans le texte du bloc : le navigateur peut
+ * les exprimer comme des offsets au niveau du PARENT du bloc (ex. « l'enfant
+ * d'indice i de `.pulse-doc` »), auquel cas `commonAncestorContainer` est ce
+ * parent lui-même — un conteneur générique, sans `data-line`. `.closest()` ne
+ * remonte que vers le haut : il ne peut jamais retrouver, depuis ce parent,
+ * lequel de ses enfants a réellement été sélectionné. D'où le repli : chercher
+ * parmi tous les blocs racine celui que le `Range` recoupe effectivement.
+ */
+export function enclosingBlockForRange(container: HTMLElement, range: Range): HTMLElement | null {
+  const fast = enclosingRootBlock(container, range.commonAncestorContainer);
+  if (fast) return fast;
+  const blocks = container.querySelectorAll<HTMLElement>('[data-line]');
+  for (const block of blocks) {
+    if (range.intersectsNode(block)) return block;
+  }
+  return null;
+}
+
 function normalizeText(s: string): string {
   return s.replace(/\s+/g, ' ').trim();
 }
@@ -88,7 +112,7 @@ export function buildPendingAnchorFromSelection(container: HTMLElement): Pending
   const quote = normalizeText(selection.toString());
   if (!quote) return null;
 
-  const block = enclosingRootBlock(container, range.commonAncestorContainer);
+  const block = enclosingBlockForRange(container, range);
   if (!block) return null;
   const lineAttr = block.getAttribute('data-line');
   const line = lineAttr === null ? NaN : Number(lineAttr);
