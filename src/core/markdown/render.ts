@@ -78,6 +78,15 @@ function getHighlighter(): typeof hljs {
 
 // Blocs racine porteurs de data-line (SPEC §5) : uniquement au niveau 0
 // (jamais un paragraphe imbriqué dans une liste ou une citation).
+//
+// `html_block` : du HTML brut embarqué directement dans le Markdown (ex. un
+// <blockquote> ou <div> écrit à la main plutôt qu'avec la syntaxe native).
+// Son rendu par défaut de markdown-it ignore totalement `token.attrSet` (le
+// renderer se contente de recopier `token.content` tel quel) — le poser ici
+// ne suffit PAS à lui seul : `markHtmlBlockRenderer` ci-dessous l'enveloppe
+// explicitement dans un conteneur porteur de `data-line`. Sans ce cas, tout
+// bloc HTML brut est invisible à l'ancrage (ni pilule de sélection, ni
+// raccourci « c », ni bouton de la gouttière ne le détectent).
 const ROOT_BLOCK_TYPES = new Set([
   'paragraph_open',
   'heading_open',
@@ -87,6 +96,7 @@ const ROOT_BLOCK_TYPES = new Set([
   'bullet_list_open',
   'ordered_list_open',
   'hr',
+  'html_block',
 ]);
 
 function slugify(text: string): string {
@@ -123,6 +133,25 @@ function markExternalLinks(md: MarkdownIt): void {
       token.attrSet('rel', 'noopener noreferrer');
     }
     return renderDefault(tokens, idx, options, env, self);
+  };
+}
+
+/**
+ * Enveloppe chaque bloc HTML brut racine (`html_block`, niveau 0) dans un
+ * conteneur porteur de `data-line` — le renderer par défaut de markdown-it
+ * pour ce type de token se contente de recopier `token.content` verbatim et
+ * ignore tout attribut posé via `attrSet`. Sans cette enveloppe, du HTML écrit
+ * à la main dans le Markdown (ex. `<blockquote>…</blockquote>`) rendrait
+ * visuellement à l'identique d'un bloc natif mais resterait invisible à
+ * l'ancrage des commentaires (COMMENT-SPEC §3). Un bloc imbriqué (niveau > 0,
+ * ex. HTML brut à l'intérieur d'une liste) n'est PAS enveloppé : comme pour
+ * les autres types, seul le bloc racine englobant porte `data-line`.
+ */
+function markHtmlBlockRenderer(md: MarkdownIt): void {
+  md.renderer.rules.html_block = (tokens, idx) => {
+    const token = tokens[idx];
+    if (token.level !== 0 || !token.map) return token.content;
+    return `<div class="pulse-html-block" data-line="${token.map[0]}">${token.content}</div>`;
   };
 }
 
@@ -193,6 +222,7 @@ function createMarkdownIt(): MarkdownIt {
   markDataLine(md);
   markExternalLinks(md);
   markFenceRenderer(md);
+  markHtmlBlockRenderer(md);
 
   return md;
 }

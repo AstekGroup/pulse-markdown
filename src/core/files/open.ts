@@ -15,6 +15,29 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError';
 }
 
+/**
+ * Demande la permission d'écriture dès l'ouverture, pendant que le geste
+ * utilisateur (clic sur « Ouvrir », dépôt du fichier) est encore actif.
+ *
+ * `showOpenFilePicker` ne rend le handle qu'en lecture — sans cet appel,
+ * Chrome ne demande la permission d'écriture qu'au premier `createWritable()`
+ * (donc au premier clic sur « Enregistrer », potentiellement bien après
+ * l'ouverture). Ce prompt natif, différé et sans retour visuel de notre part
+ * pendant l'attente, est perçu comme un gel de l'application. On la déclenche
+ * ici, tout de suite, pour qu'elle soit déjà acquise au moment d'enregistrer.
+ * Best-effort : un refus n'empêche pas d'ouvrir le fichier, seulement
+ * l'enregistrement direct (repli téléchargement, cf. save.ts).
+ */
+async function requestWritePermission(handle: FileSystemHandle): Promise<void> {
+  if (typeof handle.requestPermission !== 'function') return;
+  try {
+    await handle.requestPermission({ mode: 'readwrite' });
+  } catch {
+    // Ignoré : `saveFile` re-vérifie la permission et bascule sur le
+    // téléchargement si elle n'est toujours pas accordée.
+  }
+}
+
 function pickMarkdownFileFallback(): Promise<FileEntry | null> {
   return new Promise((resolve) => {
     const input = document.createElement('input');
@@ -51,6 +74,7 @@ export async function pickMarkdownFile(): Promise<FileEntry | null> {
     try {
       const [handle] = await window.showOpenFilePicker({ types: ACCEPT_TYPES, multiple: false });
       if (!handle) return null;
+      await requestWritePermission(handle);
       const file = await handle.getFile();
       return { id: handle.name, name: handle.name, path: handle.name, handle, file, source: 'picker' };
     } catch (error) {
@@ -137,6 +161,7 @@ export async function openDroppedItems(items: DataTransferItemList): Promise<Dro
     }
     if (handle?.kind === 'file') {
       if (!isMarkdownFile(handle.name)) continue;
+      await requestWritePermission(handle);
       const file = await handle.getFile();
       return {
         kind: 'file',

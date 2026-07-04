@@ -19,6 +19,11 @@ export function detectBlockType(el: Element): string {
   // Diagramme Mermaid : `.mermaid-diagram` (hydraté, DIV) ou `.mermaid-src`
   // (avant hydratation, PRE) — ni l'un ni l'autre n'est identifiable par tag.
   if (el.matches('.mermaid-diagram, .mermaid-src')) return 'diagram';
+  // HTML brut embarqué directement dans le Markdown (render.ts,
+  // markHtmlBlockRenderer) : ni paragraphe ni aucun autre type reconnu, quel
+  // que soit ce qu'il enveloppe visuellement (ex. un <blockquote> écrit à la
+  // main).
+  if (el.classList.contains('pulse-html-block')) return 'other';
   const tag = el.tagName;
   if (/^H[1-6]$/.test(tag)) return 'heading';
   if (tag === 'UL' || tag === 'OL') return 'list';

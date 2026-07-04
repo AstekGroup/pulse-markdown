@@ -77,6 +77,26 @@ textarea:focus-visible,
 .btn--primary:hover {
   filter: brightness(1.08);
 }
+.btn:disabled {
+  cursor: default;
+  opacity: 0.75;
+  filter: none;
+}
+.btn--primary:disabled[aria-busy='true'] {
+  /* Le clic sur « Enregistrer » peut attendre une permission native du
+     navigateur (accès en écriture au fichier) — cette pulsation évite que
+     l'attente ne soit perçue comme un gel de l'application. */
+  animation: btn-busy-pulse 1.1s ease-in-out infinite;
+}
+@keyframes btn-busy-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
 .btn--secondary {
   border-color: var(--paper-edge);
   background: var(--paper-raised);

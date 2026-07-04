@@ -121,9 +121,15 @@ export function TopBar() {
             <MessageSquarePlus size={16} />
             Commenter
           </button>
-          <button type="button" className="btn btn--primary" onClick={() => void save()}>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => void save()}
+            disabled={saveState === 'saving'}
+            aria-busy={saveState === 'saving'}
+          >
             <Save size={16} />
-            Enregistrer
+            {saveState === 'saving' ? 'Enregistrement…' : 'Enregistrer'}
           </button>
           <div className="topbar__menu" ref={menuRef}>
             <button

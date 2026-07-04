@@ -364,8 +364,14 @@ export const useStore = create<PulseStore>((set, get) => {
     },
 
     async save() {
-      const { doc, currentEntry } = get();
+      const { doc, currentEntry, saveState } = get();
       if (!doc || !currentEntry) return;
+      // Sans ce garde-fou, un clic répété pendant l'attente d'une permission
+      // navigateur (cf. save.ts) déclencherait plusieurs `createWritable()`
+      // concurrents — la première tentative suffit ; les suivantes n'ajoutent
+      // que de la confusion (prompts empilés) pendant que l'utilisateur, ne
+      // voyant rien se passer, insiste sur le bouton.
+      if (saveState === 'saving') return;
       set({ saveState: 'saving' });
       try {
         const mode = await saveFile(currentEntry, doc.source);

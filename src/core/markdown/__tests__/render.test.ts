@@ -93,6 +93,25 @@ describe('renderMarkdown — data-line sur les blocs racine', () => {
   });
 });
 
+describe('renderMarkdown — HTML brut embarqué (html_block)', () => {
+  it('enveloppe un bloc HTML brut racine dans un conteneur data-line', () => {
+    const { html } = renderMarkdown(
+      'Avant.\n\n<blockquote>Écrit à la main, pas en syntaxe native.</blockquote>\n\nAprès.',
+    );
+    expect(html).toContain('class="pulse-html-block"');
+    const wrapper = openingTags(html, 'div').find((tag) => tag.includes('pulse-html-block'));
+    expect(wrapper).toContain('data-line="2"');
+    // Le contenu HTML brut lui-même reste inchangé, seulement enveloppé.
+    expect(html).toContain('<blockquote>Écrit à la main, pas en syntaxe native.</blockquote>');
+  });
+
+  it("n'enveloppe pas un bloc HTML brut imbriqué dans une liste (seul le bloc racine porte data-line)", () => {
+    const { html } = renderMarkdown('- item\n  <blockquote>Imbriqué</blockquote>\n- autre item');
+    expect(html).not.toContain('pulse-html-block');
+    expect(openingTags(html, 'ul')[0]).toContain('data-line="0"');
+  });
+});
+
 describe('renderMarkdown — XSS neutralisé', () => {
   it('neutralise une balise <script>', () => {
     const { html } = renderMarkdown('<script>alert(1)</script>\n\nTexte.');
