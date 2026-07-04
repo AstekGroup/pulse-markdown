@@ -1,0 +1,90 @@
+/* print.css — impression (⌘P) : n'affiche que le document, sans chrome
+   applicatif, sans ancres de commentaires visibles ("le document seul"). */
+
+@media print {
+  html,
+  body {
+    background: #fff;
+  }
+
+  .library-rail,
+  .topbar,
+  .statusbar,
+  .comments-panel,
+  .pulse-toc,
+  .pulse-gutter-btn,
+  .selection-pill,
+  .code-copy-btn,
+  .toasts,
+  .drop-veil,
+  .palette-backdrop {
+    display: none !important;
+  }
+
+  .app-shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+  .app-main {
+    display: block;
+  }
+  .app-content {
+    overflow: visible;
+    height: auto;
+  }
+
+  .reader-view {
+    display: block;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+  }
+  .pulse-doc-wrapper {
+    max-width: none;
+    width: auto;
+  }
+
+  .pulse-doc {
+    color: #000;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  .pulse-doc a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .pulse-doc mark.pulse-anchor {
+    background: none !important;
+    text-decoration: none !important;
+    animation: none !important;
+    padding: 0;
+    color: inherit;
+  }
+
+  .pulse-doc pre,
+  .pulse-doc table,
+  .pulse-doc blockquote,
+  .pulse-doc figure,
+  .pulse-doc img {
+    page-break-inside: avoid;
+  }
+  .pulse-doc h1,
+  .pulse-doc h2,
+  .pulse-doc h3 {
+    page-break-after: avoid;
+  }
+
+  .pulse-doc pre {
+    white-space: pre-wrap;
+    border: 1px solid #ccc;
+  }
+
+  .pulse-doc .mermaid-diagram {
+    border: none;
+    padding: 0;
+  }
+}

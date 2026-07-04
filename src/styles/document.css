@@ -1,0 +1,543 @@
+/* document.css — typographie du document rendu (classe .pulse-doc, DESIGN-BRIEF §4).
+   Composition éditoriale : corps, titres, tableaux, code, ancres de commentaires…
+   Contient aussi la mise en page de la TOC flottante, de la gouttière de
+   commentaires et de la vue source (SourceView), seuls fichiers de style
+   confiés à cette mission. */
+
+/* ——— Disposition de la vue lecture (TOC + colonne document) ——— */
+
+.reader-view {
+  position: relative;
+  max-width: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+}
+
+.pulse-doc-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 72ch;
+  flex: 0 1 72ch;
+  min-width: 0;
+}
+
+.pulse-toc {
+  position: sticky;
+  top: 96px;
+  flex: 0 0 220px;
+  width: 220px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.pulse-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--paper-edge);
+}
+.pulse-toc li {
+  margin: 0;
+}
+.pulse-toc__level-2 button {
+  padding-left: 22px;
+}
+.pulse-toc__level-3 button {
+  padding-left: 34px;
+}
+.pulse-toc button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 32px;
+  text-align: left;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  margin-left: -1px;
+  padding: 8px 10px;
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pulse-toc button:hover {
+  color: var(--text);
+  background: var(--pulse-soft);
+}
+.pulse-toc button.is-active {
+  color: var(--pulse);
+  border-left-color: var(--pulse);
+  font-weight: 600;
+  background: var(--pulse-soft);
+}
+
+@media (max-width: 1440px) {
+  .pulse-toc {
+    display: none;
+  }
+  .reader-view {
+    gap: 0;
+  }
+}
+
+/* ——— Gouttière droite : bouton « commenter ce bloc » ——— */
+
+.pulse-gutter-btn {
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--paper-edge);
+  background: var(--paper-raised);
+  color: var(--pulse);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    background-color 120ms ease;
+  box-shadow: var(--shadow-card);
+}
+.pulse-doc-wrapper:hover .pulse-gutter-btn,
+.pulse-gutter-btn:focus-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+.pulse-gutter-btn:hover {
+  background: var(--pulse-soft);
+}
+
+@media (max-width: 1100px) {
+  .pulse-gutter-btn {
+    display: none;
+  }
+}
+
+/* ——— Pilule flottante « Commenter » (sélection de texte) ——— */
+
+.selection-pill {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 10px));
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--ink-900);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  z-index: 40;
+  animation: pill-in 120ms ease-out;
+}
+.selection-pill:hover {
+  background: var(--ink-800);
+}
+@keyframes pill-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 10px));
+  }
+}
+
+/* ——— Composition éditoriale du document ——— */
+
+.pulse-doc {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--text);
+  text-wrap: pretty;
+  hyphens: auto;
+}
+.pulse-doc[data-font='sans'] {
+  font-family: var(--font-sans);
+  hyphens: none;
+}
+
+.pulse-doc > * + * {
+  margin-top: 1.15em;
+}
+
+.pulse-doc h1,
+.pulse-doc h2,
+.pulse-doc h3,
+.pulse-doc h4,
+.pulse-doc h5,
+.pulse-doc h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+  scroll-margin-top: 96px;
+  position: relative;
+}
+.pulse-doc h1 {
+  font-size: 2.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--paper-edge);
+  margin-top: 0;
+}
+.pulse-doc h2 {
+  font-size: 1.5rem;
+  margin-top: 2em;
+}
+.pulse-doc h3 {
+  font-size: 1.17rem;
+  margin-top: 1.75em;
+}
+.pulse-doc h4,
+.pulse-doc h5,
+.pulse-doc h6 {
+  font-size: 1rem;
+  margin-top: 1.5em;
+}
+.pulse-doc h2[id]:hover::before,
+.pulse-doc h3[id]:hover::before {
+  content: '#';
+  position: absolute;
+  left: -1.1em;
+  color: var(--pulse);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.pulse-doc p {
+  margin: 1.15em 0;
+}
+
+.pulse-doc a {
+  color: var(--pulse);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  border-radius: 3px;
+  transition: background-color 120ms ease;
+}
+.pulse-doc a:hover {
+  background: var(--pulse-soft);
+}
+
+.pulse-doc ul,
+.pulse-doc ol {
+  padding-left: 1.6em;
+  margin: 1.15em 0;
+}
+.pulse-doc li + li {
+  margin-top: 0.4em;
+}
+.pulse-doc li > ul,
+.pulse-doc li > ol {
+  margin: 0.4em 0;
+}
+
+.pulse-doc blockquote {
+  margin: 1.4em 0;
+  padding: 0.75em 1.2em;
+  border-left: 3px solid var(--pulse);
+  background: var(--pulse-soft);
+  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+  font-style: italic;
+  color: var(--text);
+}
+.pulse-doc blockquote > * {
+  margin: 0.5em 0;
+}
+
+.pulse-doc hr {
+  border: none;
+  border-top: 1px solid var(--paper-edge);
+  margin: 2em 0;
+}
+
+/* ——— Tableaux ——— */
+
+.pulse-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+  display: block;
+  overflow-x: auto;
+  border-radius: var(--radius-m);
+}
+.pulse-doc thead th {
+  font-variant: small-caps;
+  letter-spacing: 0.03em;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--paper-edge);
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+.pulse-doc td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--paper-edge);
+  vertical-align: top;
+}
+.pulse-doc tbody tr:nth-child(even) {
+  background: var(--pulse-soft);
+}
+
+/* ——— Code ——— */
+
+.pulse-doc code {
+  font-family: var(--font-mono);
+}
+.pulse-doc :not(pre) > code {
+  background: var(--paper-edge);
+  padding: 0.15em 0.4em;
+  border-radius: var(--radius-s);
+  font-size: 0.9em;
+}
+
+.pulse-doc pre {
+  position: relative;
+  background: var(--ink-900);
+  color: var(--ink-100);
+  padding: 36px 16px 16px;
+  border-radius: var(--radius-m);
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.6;
+}
+.pulse-doc pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.pulse-doc pre[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-300);
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--ink-700);
+  background: var(--ink-800);
+  color: var(--ink-100);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.pulse-doc pre:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+  opacity: 1;
+}
+.code-copy-btn:hover {
+  background: var(--ink-700);
+}
+
+/* ——— Cases à cocher (task lists) ——— */
+
+.pulse-doc .task-list-item {
+  list-style: none;
+  margin-left: -1.6em;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+.pulse-doc .task-list-item-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 0.3em;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--paper-raised);
+  position: relative;
+  cursor: default;
+}
+.pulse-doc .task-list-item-checkbox:checked {
+  background: var(--pulse);
+  border-color: var(--pulse);
+}
+.pulse-doc .task-list-item-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ——— Images ——— */
+
+.pulse-doc img {
+  max-width: 100%;
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  display: block;
+}
+.pulse-doc img[title] {
+  margin-bottom: 0.4em;
+}
+
+/* ——— Notes de bas de page ——— */
+
+.pulse-doc .footnotes {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--paper-edge);
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+.pulse-doc .footnote-ref {
+  color: var(--pulse);
+  font-weight: 600;
+}
+.pulse-doc .footnote-backref {
+  color: var(--pulse);
+  text-decoration: none;
+  margin-left: 0.3em;
+}
+
+/* ——— Diagrammes Mermaid ——— */
+
+.pulse-doc .mermaid-diagram {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-m);
+  overflow-x: auto;
+}
+.pulse-doc .mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+.pulse-doc .mermaid-diagram-error {
+  color: var(--warn);
+  font-size: 0.9em;
+  font-style: italic;
+}
+
+/* ——— Ancres de commentaires ——— */
+
+.pulse-doc mark.pulse-anchor {
+  background: var(--highlight);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0.02em 0.15em;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--pulse);
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.pulse-doc mark.pulse-anchor.is-active {
+  background: var(--highlight-active);
+}
+.pulse-doc mark.pulse-anchor.is-pulsing {
+  animation: anchor-pulse 700ms ease-in-out 2;
+}
+
+/* Ancrage de BLOC entier (ex. diagramme Mermaid) : le SVG interne ne peut pas
+   recevoir de <mark> HTML (namespace SVG, non rendu), on marque donc le
+   conteneur lui-même. Le conteneur (.mermaid-diagram) a déjà bordure/radius :
+   un liseré (outline, hors flux) suffit à rendre l'état ancré visible sans
+   décaler la mise en page. */
+.pulse-doc .pulse-anchor-block {
+  outline: 2px solid var(--pulse);
+  outline-offset: -1px;
+  border-radius: var(--radius-m);
+  background: var(--pulse-soft);
+  cursor: pointer;
+}
+.pulse-doc .pulse-anchor-block.is-active {
+  outline-color: var(--pulse-bright);
+  background: var(--highlight-active);
+}
+.pulse-doc .pulse-anchor-block.is-pulsing {
+  animation: anchor-pulse 700ms ease-in-out 2;
+}
+
+/* ——— Vue source (SourceView) ——— */
+
+.source-view {
+  padding: 0;
+}
+.source-view__empty {
+  padding: 32px 24px;
+  color: var(--text-muted);
+}
+.source-view__code {
+  margin: 0;
+  padding: 24px 24px 64px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  counter-reset: source-line;
+  /* Pas de ligatures ici : `<!--` et `-->` doivent montrer leurs caractères
+     exacts, pas les glyphes composés de JetBrains Mono. */
+  font-variant-ligatures: none;
+}
+.source-line {
+  display: block;
+  position: relative;
+  padding-left: 3.75em;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 3px;
+}
+.source-line::before {
+  counter-increment: source-line;
+  content: counter(source-line);
+  position: absolute;
+  left: 0;
+  width: 3em;
+  text-align: right;
+  color: var(--text-muted);
+  opacity: 0.55;
+  user-select: none;
+}
+.source-line--marker {
+  background: var(--pulse-soft);
+}
